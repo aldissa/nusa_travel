@@ -14,6 +14,7 @@ class HomeScreen extends StatelessWidget {
       arguments: package,
     );
   }
+  
 
   /// Logout: hapus SELURUH riwayat halaman, lalu buka Splash.
   /// Predicate `(route) => false` berarti semua route di stack dihapus.
@@ -39,6 +40,12 @@ class HomeScreen extends StatelessWidget {
           ),
         ),
         actions: [
+                    // TEMPORARY: hapus setelah tes 404 selesai
+          IconButton(
+            tooltip: 'Tes 404',
+            icon: const Icon(Icons.bug_report_rounded),
+            onPressed: () => Navigator.pushNamed(context, '/promo-special'),
+          ),
           IconButton(
             tooltip: 'Logout',
             style: IconButton.styleFrom(
