@@ -157,7 +157,3 @@ flutter run
 - Material Design 3 (bawaan Flutter)
 
 ---
-
-## 👤 Dibuat Oleh
-
-**NusaTravel** — Jelajahi Keindahan Nusantara Bersama Kami 🇮🇩
