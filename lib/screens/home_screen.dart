@@ -2,9 +2,21 @@ import 'package:flutter/material.dart';
 
 import '../models/tour_package.dart';
 import '../routes/app_routes.dart';
+import 'history_screen.dart';
+import 'profile_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _currentNavIndex = 0;
+
+  static const Color _ocean = Color(0xFF0369A1);
+  static const Color _teal = Color(0xFF0D9488);
 
   /// Pindah ke Detail sambil mengirim objek TourPackage lewat `arguments`.
   void _openDetail(BuildContext context, TourPackage package) {
@@ -14,7 +26,6 @@ class HomeScreen extends StatelessWidget {
       arguments: package,
     );
   }
-  
 
   /// Logout: hapus SELURUH riwayat halaman, lalu buka Splash.
   /// Predicate `(route) => false` berarti semua route di stack dihapus.
@@ -26,21 +37,24 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
+  /// Judul AppBar sesuai tab aktif.
+  static const List<String> _titles = ['NusaTravel', 'Riwayat Pesanan', 'Profil'];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
-        title: const Text(
-          'NusaTravel',
-          style: TextStyle(
+        title: Text(
+          _titles[_currentNavIndex],
+          style: const TextStyle(
             fontWeight: FontWeight.w800,
             color: Color(0xFF0369A1),
           ),
         ),
         actions: [
-                    // TEMPORARY: hapus setelah tes 404 selesai
+          // TEMPORARY: hapus setelah tes 404 selesai
           IconButton(
             tooltip: 'Tes 404',
             icon: const Icon(Icons.bug_report_rounded),
@@ -57,17 +71,117 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(width: 12),
         ],
       ),
-      body: ListView.separated(
-        padding: const EdgeInsets.all(16),
-        itemCount: dummyTourPackages.length,
-        separatorBuilder: (context, index) => const SizedBox(height: 20),
-        itemBuilder: (context, index) {
-          final package = dummyTourPackages[index];
-          return _PackageCard(
-            package: package,
-            onTap: () => _openDetail(context, package),
-          );
+      drawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            UserAccountsDrawerHeader(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [_ocean, _teal],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
+              currentAccountPicture: CircleAvatar(
+                backgroundColor: Colors.white,
+                child: Icon(
+                  Icons.person_rounded,
+                  size: 40,
+                  color: _ocean,
+                ),
+              ),
+              accountName: const Text(
+                'Pengelana Nusantara',
+                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+              ),
+              accountEmail: const Text('traveler@nusatravel.id'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.explore_rounded, color: _ocean),
+              title: const Text('Jelajahi Paket'),
+              selected: _currentNavIndex == 0,
+              selectedColor: _ocean,
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentNavIndex = 0);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.receipt_long_rounded),
+              title: const Text('Riwayat Pemesanan'),
+              selected: _currentNavIndex == 1,
+              selectedColor: _ocean,
+              onTap: () {
+                Navigator.pop(context);
+                setState(() => _currentNavIndex = 1);
+              },
+            ),
+            const Divider(),
+            ListTile(
+              leading: const Icon(Icons.logout_rounded, color: Color(0xFFBA1A1A)),
+              title: const Text(
+                'Keluar / Logout',
+                style: TextStyle(color: Color(0xFFBA1A1A), fontWeight: FontWeight.w600),
+              ),
+              onTap: () {
+                Navigator.pop(context);
+                _logout(context);
+              },
+            ),
+          ],
+        ),
+      ),
+      body: IndexedStack(
+        index: _currentNavIndex,
+        children: [
+          // Tab 0: Eksplor – list paket wisata
+          ListView.separated(
+            padding: const EdgeInsets.all(16),
+            itemCount: dummyTourPackages.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 20),
+            itemBuilder: (context, index) {
+              final package = dummyTourPackages[index];
+              return _PackageCard(
+                package: package,
+                onTap: () => _openDetail(context, package),
+              );
+            },
+          ),
+          // Tab 1: Riwayat Pesanan
+          const HistoryScreen(),
+          // Tab 2: Profil
+          const ProfileScreen(),
+        ],
+      ),
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: _currentNavIndex,
+        onDestinationSelected: (index) {
+          setState(() {
+            _currentNavIndex = index;
+          });
         },
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        elevation: 4,
+        indicatorColor: const Color(0xFFE0F2FE),
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.explore_outlined),
+            selectedIcon: Icon(Icons.explore_rounded, color: _ocean),
+            label: 'Eksplor',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.confirmation_number_outlined),
+            selectedIcon: Icon(Icons.confirmation_number_rounded, color: _ocean),
+            label: 'Pesanan',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.person_outline_rounded),
+            selectedIcon: Icon(Icons.person_rounded, color: _ocean),
+            label: 'Profil',
+          ),
+        ],
       ),
     );
   }
